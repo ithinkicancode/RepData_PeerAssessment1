@@ -163,24 +163,7 @@ The strategy for filling missing values is to use the mean (average steps) for t
 
 
 ```r
-activity_na_replaced <- transform( activity, steps = ifelse( is.na( steps ), average_steps_every_5_minutes[ average_steps_every_5_minutes$interval == 5, ]$steps, steps) )
-```
-
-Here is the statistics after replacing missing values:
-
-```r
-summary( activity_na_replaced )
-```
-
-```
-##      steps                  date          interval     
-##  Min.   :  0.0000   2012-10-01:  288   Min.   :   0.0  
-##  1st Qu.:  0.0000   2012-10-02:  288   1st Qu.: 588.8  
-##  Median :  0.0000   2012-10-03:  288   Median :1177.5  
-##  Mean   : 32.5245   2012-10-04:  288   Mean   :1177.5  
-##  3rd Qu.:  0.3396   2012-10-05:  288   3rd Qu.:1766.2  
-##  Max.   :806.0000   2012-10-06:  288   Max.   :2355.0  
-##                     (Other)   :15840
+activity_na_replaced <- transform( activity, steps = ifelse( is.na (steps), average_steps_every_5_minutes[ average_steps_every_5_minutes$interval == interval, ]$steps, steps) )
 ```
 
 Here is the histogram of this new version:
@@ -194,7 +177,7 @@ names( total_steps_by_date ) <- c( "date", "total_steps" )
 hist( total_steps_by_date$total_steps, xlab = "", main = "Total Steps Per Day (NAs replaced)" )
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
 
 ```r
 # mean of total number of steps taken per day
@@ -202,7 +185,7 @@ mean( total_steps_by_date$total_steps )
 ```
 
 ```
-## [1] 9367.057
+## [1] 10766.19
 ```
 
 ```r
@@ -211,8 +194,68 @@ median( total_steps_by_date$total_steps )
 ```
 
 ```
-## [1] 10395
+## [1] 10765.59
 ```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```r
+activity_na_replaced$day <- weekdays( as.Date (activity_na_replaced$date) )
+
+week_days <- c ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+
+activity_na_replaced[ ! activity_na_replaced$day %in% week_days, "day"] <- "Weekend" 
+activity_na_replaced[ activity_na_replaced$day %in% week_days, "day"] <- "Weekday" 
+
+activity_na_replaced$day <- as.factor( activity_na_replaced$day )
+
+summary( activity_na_replaced$day )
+```
+
+```
+## Weekday Weekend 
+##   12960    4608
+```
+
+```r
+head ( activity_na_replaced )
+```
+
+```
+##       steps       date interval     day
+## 1 1.7169811 2012-10-01        0 Weekday
+## 2 0.3396226 2012-10-01        5 Weekday
+## 3 0.1320755 2012-10-01       10 Weekday
+## 4 0.1509434 2012-10-01       15 Weekday
+## 5 0.0754717 2012-10-01       20 Weekday
+## 6 2.0943396 2012-10-01       25 Weekday
+```
+
+Here is the plot comparing the steps of weekdays and those on the weekends:
+
+```r
+activity_na_replaced_compare <- aggregate( activity_na_replaced$steps, list( activity_na_replaced$interval, activity_na_replaced$day), mean )
+names( activity_na_replaced_compare ) <- c("interval", "is_weekend", "average_steps")
+
+head ( activity_na_replaced_compare )
+```
+
+```
+##   interval is_weekend average_steps
+## 1        0    Weekday            NA
+## 2        5    Weekday            NA
+## 3       10    Weekday            NA
+## 4       15    Weekday            NA
+## 5       20    Weekday            NA
+## 6       25    Weekday            NA
+```
+
+```r
+library( lattice )
+par( mfrow = c(2,1) )
+
+xyplot( average_steps ~ interval | is_weekend, data = activity_na_replaced_compare, type = "l", aspect = 2/5, ylab = "Number of steps", main = "Average Daily Pattern" )
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 

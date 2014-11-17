@@ -79,12 +79,8 @@ tail( activity_with_na )
 The strategy for filling missing values is to use the mean (average steps) for the corresponding interval.
 
 ```{r}
-activity_na_replaced <- transform( activity, steps = ifelse( is.na( steps ), average_steps_every_5_minutes[ average_steps_every_5_minutes$interval == 5, ]$steps, steps) )
-```
+activity_na_replaced <- transform( activity, steps = ifelse( is.na (steps), average_steps_every_5_minutes[ average_steps_every_5_minutes$interval == interval, ]$steps, steps) )
 
-Here is the statistics after replacing missing values:
-```{r}
-summary( activity_na_replaced )
 ```
 
 Here is the histogram of this new version:
@@ -105,3 +101,30 @@ median( total_steps_by_date$total_steps )
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r}
+activity_na_replaced$day <- weekdays( as.Date (activity_na_replaced$date) )
+
+week_days <- c ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+
+activity_na_replaced[ ! activity_na_replaced$day %in% week_days, "day"] <- "Weekend" 
+activity_na_replaced[ activity_na_replaced$day %in% week_days, "day"] <- "Weekday" 
+
+activity_na_replaced$day <- as.factor( activity_na_replaced$day )
+
+summary( activity_na_replaced$day )
+
+head ( activity_na_replaced )
+```
+
+Here is the plot comparing the steps of weekdays and those on the weekends:
+```{r}
+activity_na_replaced_compare <- aggregate( activity_na_replaced$steps, list( activity_na_replaced$interval, activity_na_replaced$day), mean )
+names( activity_na_replaced_compare ) <- c("interval", "is_weekend", "average_steps")
+
+head ( activity_na_replaced_compare )
+
+library( lattice )
+par( mfrow = c(2,1) )
+
+xyplot( average_steps ~ interval | is_weekend, data = activity_na_replaced_compare, type = "l", aspect = 2/5, ylab = "Number of steps", main = "Average Daily Pattern" )
+```
