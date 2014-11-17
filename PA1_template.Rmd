@@ -113,16 +113,17 @@ activity_na_replaced$day <- as.factor( activity_na_replaced$day )
 
 summary( activity_na_replaced$day )
 
-head ( activity_na_replaced )
+#head ( activity_na_replaced )
 ```
 
 Here is the plot comparing the steps of weekdays and those on the weekends:
 ```{r}
-activity_na_replaced_compare <- aggregate( activity_na_replaced$steps, list( activity_na_replaced$interval, activity_na_replaced$day), mean )
+
+activity_na_replaced_compare <- aggregate( activity_na_replaced$steps ~ activity_na_replaced$interval + activity_na_replaced$day, activity_na_replaced, mean )
+
 names( activity_na_replaced_compare ) <- c("interval", "is_weekend", "average_steps")
 
-head ( activity_na_replaced_compare )
-
+# plot it
 library( lattice )
 par( mfrow = c(2,1) )
 

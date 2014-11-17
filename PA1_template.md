@@ -219,39 +219,17 @@ summary( activity_na_replaced$day )
 ```
 
 ```r
-head ( activity_na_replaced )
-```
-
-```
-##       steps       date interval     day
-## 1 1.7169811 2012-10-01        0 Weekday
-## 2 0.3396226 2012-10-01        5 Weekday
-## 3 0.1320755 2012-10-01       10 Weekday
-## 4 0.1509434 2012-10-01       15 Weekday
-## 5 0.0754717 2012-10-01       20 Weekday
-## 6 2.0943396 2012-10-01       25 Weekday
+#head ( activity_na_replaced )
 ```
 
 Here is the plot comparing the steps of weekdays and those on the weekends:
 
 ```r
-activity_na_replaced_compare <- aggregate( activity_na_replaced$steps, list( activity_na_replaced$interval, activity_na_replaced$day), mean )
+activity_na_replaced_compare <- aggregate( activity_na_replaced$steps ~ activity_na_replaced$interval + activity_na_replaced$day, activity_na_replaced, mean )
+
 names( activity_na_replaced_compare ) <- c("interval", "is_weekend", "average_steps")
 
-head ( activity_na_replaced_compare )
-```
-
-```
-##   interval is_weekend average_steps
-## 1        0    Weekday            NA
-## 2        5    Weekday            NA
-## 3       10    Weekday            NA
-## 4       15    Weekday            NA
-## 5       20    Weekday            NA
-## 6       25    Weekday            NA
-```
-
-```r
+# plot it
 library( lattice )
 par( mfrow = c(2,1) )
 
